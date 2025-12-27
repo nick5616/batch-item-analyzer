@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
 export const ParticleBackground = ({ active }: { active: boolean }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -86,4 +86,3 @@ export const ParticleBackground = ({ active }: { active: boolean }) => {
         />
     );
 };
-

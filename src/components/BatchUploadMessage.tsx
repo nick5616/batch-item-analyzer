@@ -1,7 +1,7 @@
 import React from "react";
 import { Upload, CheckCircle2 } from "lucide-react";
 import { cn } from "../utils";
-import type { Message, ImageAsset } from "../types";
+import type { Message } from "../types";
 
 interface BatchUploadMessageProps {
     message: Message;
@@ -36,7 +36,9 @@ export const BatchUploadMessage: React.FC<BatchUploadMessageProps> = ({
                     return (
                         <div
                             key={img.id}
-                            onClick={() => onImageToggle(img.id, message.batchId!)}
+                            onClick={() =>
+                                onImageToggle(img.id, message.batchId!)
+                            }
                             className={cn(
                                 "group relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all duration-300 border-2",
                                 isSelected
@@ -71,4 +73,3 @@ export const BatchUploadMessage: React.FC<BatchUploadMessageProps> = ({
         </div>
     );
 };
-
