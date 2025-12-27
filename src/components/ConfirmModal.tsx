@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "../utils";
+import { Modal } from "./Modal";
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -9,6 +9,7 @@ interface ConfirmModalProps {
     cancelText?: string;
     onConfirm: () => void;
     onCancel: () => void;
+    clickOffToClose?: boolean;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -19,30 +20,31 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     cancelText = "Cancel",
     onConfirm,
     onCancel,
+    clickOffToClose = false,
 }) => {
-    if (!isOpen) return null;
-
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
-                <h2 className="font-space text-xl mb-4">{title}</h2>
-                <p className="text-slate-300 mb-6">{message}</p>
-                <div className="flex gap-3">
-                    <button
-                        onClick={onCancel}
-                        className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-space font-medium transition-colors border border-slate-700"
-                    >
-                        {cancelText}
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-space font-medium transition-colors"
-                    >
-                        {confirmText}
-                    </button>
-                </div>
+        <Modal
+            isOpen={isOpen}
+            onClose={onCancel}
+            clickOffToClose={clickOffToClose}
+        >
+            <h2 className="font-space text-xl mb-4">{title}</h2>
+            <p className="text-slate-300 mb-6">{message}</p>
+            <div className="flex gap-3">
+                <button
+                    onClick={onCancel}
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-space font-medium transition-colors border border-slate-700"
+                >
+                    {cancelText}
+                </button>
+                <button
+                    onClick={onConfirm}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-space font-medium transition-colors"
+                >
+                    {confirmText}
+                </button>
             </div>
-        </div>
+        </Modal>
     );
 };
 

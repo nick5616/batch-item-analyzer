@@ -262,6 +262,7 @@ export default function BatchQueryChatbot() {
                 cancelText="Cancel"
                 onConfirm={confirmClearHistory}
                 onCancel={() => setShowConfirmModal(false)}
+                clickOffToClose={true}
             />
 
             {/* Settings Modal */}
@@ -274,6 +275,7 @@ export default function BatchQueryChatbot() {
                     setApiKey("");
                     setShowSettings(false);
                 }}
+                clickOffToClose={true}
             />
 
             {/* Main Chat Area */}
