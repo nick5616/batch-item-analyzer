@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
     Send,
     Upload,
@@ -44,6 +44,11 @@ export default function BatchQueryChatbot() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const optionsScrollRef = useRef<HTMLDivElement>(null);
+    const [optionsScrollState, setOptionsScrollState] = useState({
+        isAtStart: true,
+        isAtEnd: false,
+    });
     const defaultOptions = [
         "Are the products new?",
         "Are any of the products green?",
@@ -72,6 +77,43 @@ export default function BatchQueryChatbot() {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages, isProcessing]);
+
+    // Check options scroll state
+    const checkOptionsScrollState = useCallback(() => {
+        if (optionsScrollRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } =
+                optionsScrollRef.current;
+            const isAtStart = scrollLeft === 0;
+            const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 1; // -1 for rounding errors
+            setOptionsScrollState({ isAtStart, isAtEnd });
+        }
+    }, []);
+
+    // Track options scroll position
+    useEffect(() => {
+        const scrollElement = optionsScrollRef.current;
+        if (!scrollElement) return;
+
+        // Check initial state after a brief delay to ensure DOM is ready
+        const timeoutId = setTimeout(() => {
+            checkOptionsScrollState();
+        }, 0);
+
+        // Add event listeners
+        scrollElement.addEventListener("scroll", checkOptionsScrollState, {
+            passive: true,
+        });
+        window.addEventListener("resize", checkOptionsScrollState);
+
+        return () => {
+            clearTimeout(timeoutId);
+            scrollElement.removeEventListener(
+                "scroll",
+                checkOptionsScrollState
+            );
+            window.removeEventListener("resize", checkOptionsScrollState);
+        };
+    }, [checkOptionsScrollState]);
 
     // --- Handlers ---
 
@@ -375,30 +417,45 @@ export default function BatchQueryChatbot() {
                             </div>
 
                             {/* Input default options */}
-                            <div className="flex items-center overflow-x-scroll gap-2 flex-1 min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                                {defaultOptions.map((option, index) => (
-                                    <div
-                                        key={index}
-                                        className={`flex text-nowrap items-center justify-center text-xs text-slate-400 cursor-pointer transition-colors ${
-                                            option === inputValue
-                                                ? "bg-emerald-900/20 border-emerald-500/30 text-white hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-slate-400"
-                                                : "bg-slate-900/60 hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-white"
-                                        } backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 `}
-                                        onClick={() => {
-                                            if (inputValue === "") {
-                                                setInputValue(option);
-                                                inputRef.current?.focus();
-                                            } else if (inputValue === option) {
-                                                setInputValue("");
-                                            } else {
-                                                setInputValue(option);
-                                                inputRef.current?.focus();
-                                            }
-                                        }}
-                                    >
-                                        {option}
-                                    </div>
-                                ))}
+                            <div className="relative flex-1 min-w-0">
+                                <div
+                                    ref={optionsScrollRef}
+                                    className="flex items-center overflow-x-scroll gap-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                                >
+                                    {defaultOptions.map((option, index) => (
+                                        <div
+                                            key={index}
+                                            className={`flex text-nowrap items-center justify-center text-xs text-slate-400 cursor-pointer transition-colors ${
+                                                option === inputValue
+                                                    ? "bg-emerald-900/20 border-emerald-500/30 text-white hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-slate-400"
+                                                    : "bg-slate-900/60 hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-white"
+                                            } backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 `}
+                                            onClick={() => {
+                                                if (inputValue === "") {
+                                                    setInputValue(option);
+                                                    inputRef.current?.focus();
+                                                } else if (
+                                                    inputValue === option
+                                                ) {
+                                                    setInputValue("");
+                                                } else {
+                                                    setInputValue(option);
+                                                    inputRef.current?.focus();
+                                                }
+                                            }}
+                                        >
+                                            {option}
+                                        </div>
+                                    ))}
+                                </div>
+                                {/* Left edge blur */}
+                                {!optionsScrollState.isAtStart && (
+                                    <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent backdrop-blur-sm pointer-events-none" />
+                                )}
+                                {/* Right edge blur */}
+                                {!optionsScrollState.isAtEnd && (
+                                    <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-slate-900 via-slate-900/60 to-transparent backdrop-blur-sm pointer-events-none" />
+                                )}
                             </div>
                             {selectedImageIds.size > 0 && (
                                 <button
@@ -419,7 +476,6 @@ export default function BatchQueryChatbot() {
                         <div
                             className="relative bg-slate-800 rounded-2xl flex items-center p-2 shadow-2xl border border-white/10"
                             onClick={() => {
-                                console.log("clicked");
                                 inputRef.current?.focus();
                             }}
                         >
