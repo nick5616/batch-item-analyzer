@@ -285,7 +285,7 @@ export default function BatchQueryChatbot() {
             <SplashAnimation trigger={splashTrigger} />
 
             {/* Header */}
-            <header className="absolute top-0 w-full p-6 flex justify-between items-center z-20 bg-gradient-to-b from-slate-900/80 to-transparent">
+            <header className="absolute top-0 w-full p-6 flex justify-between items-center z-20 bg-gradient-to-b from-slate-900/20 to-transparent backdrop-blur-sm">
                 <h1 className="font-space text-2xl font-bold tracking-tight text-white flex items-center gap-2">
                     <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_rgb(16,185,129)]" />
                     BatchQuery <span className="text-emerald-500">AI</span>
