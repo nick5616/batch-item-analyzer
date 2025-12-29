@@ -12,32 +12,38 @@ export const analyzeImage = async (
     apiKey: string
 ): Promise<AnalysisResult> => {
     try {
-        const apiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            {
-                                type: "text",
-                                text: question,
-                            },
-                            {
-                                type: "image_url",
-                                image_url: { url: image.base64 },
-                            },
-                        ],
-                    },
-                ],
-                max_tokens: 300,
-            }),
-        });
+        // Add 5 second delay before making the API call
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const apiRes = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                {
+                                    type: "text",
+                                    text: question,
+                                },
+                                {
+                                    type: "image_url",
+                                    image_url: { url: image.base64 },
+                                },
+                            ],
+                        },
+                    ],
+                    max_tokens: 300,
+                }),
+            }
+        );
 
         const data = await apiRes.json();
 
@@ -59,4 +65,3 @@ export const analyzeImage = async (
         };
     }
 };
-

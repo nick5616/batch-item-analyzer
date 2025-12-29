@@ -75,4 +75,3 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         </div>
     );
 };
-

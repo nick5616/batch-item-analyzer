@@ -19,4 +19,3 @@ export interface Message {
     }[];
     timestamp: string; // Changed to string for JSON serialization
 }
-

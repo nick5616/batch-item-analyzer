@@ -10,6 +10,7 @@ import {
 import type { Message, ImageAsset } from "./types";
 import { cn, generateUUID, convertFileToBase64 } from "./utils";
 import { ParticleBackground } from "./components/ParticleBackground";
+import { SplashAnimation } from "./components/SplashAnimation";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { SettingsModal } from "./components/SettingsModal";
 import { BatchUploadMessage } from "./components/BatchUploadMessage";
@@ -32,6 +33,7 @@ export default function BatchQueryChatbot() {
 
     const [inputValue, setInputValue] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
+    const [splashTrigger, setSplashTrigger] = useState(0);
 
     // Selection State
     const [selectedImageIds, setSelectedImageIds] = useState<Set<string>>(
@@ -42,6 +44,12 @@ export default function BatchQueryChatbot() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const defaultOptions = [
+        "Are the products new?",
+        "Are any of the products green?",
+        "How many products are there?",
+        "Are there any products are in the image?",
+    ];
 
     // --- Effects ---
 
@@ -204,6 +212,9 @@ export default function BatchQueryChatbot() {
                     timestamp: new Date().toISOString(),
                 },
             ]);
+
+            // Trigger splash animation
+            setSplashTrigger((prev) => prev + 1);
         } catch (e) {
             console.error("Batch processing failed", e);
         } finally {
@@ -227,6 +238,9 @@ export default function BatchQueryChatbot() {
 
             {/* Dynamic Background */}
             <ParticleBackground active={isProcessing} />
+
+            {/* Splash Animation */}
+            <SplashAnimation trigger={splashTrigger} />
 
             {/* Header */}
             <header className="absolute top-0 w-full p-6 flex justify-between items-center z-20 bg-gradient-to-b from-slate-900/80 to-transparent">
@@ -330,50 +344,78 @@ export default function BatchQueryChatbot() {
             {/* Input Area */}
             <div className="absolute bottom-0 w-full p-4 md:p-6 z-30 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent">
                 <div className="max-w-4xl mx-auto">
-                    <div className=" flex items-center justify-between mb-3 px-1">
-                        <div
-                            className={cn(
-                                "bg-red-500 flex items-center gap-2 px-3 py-1.5 rounded-lg backdrop-blur-md border transition-all duration-300",
-                                selectedImageIds.size > 0
-                                    ? "bg-slate-900/80 border-emerald-500/30"
-                                    : "bg-transparent border-transparent"
-                            )}
-                        >
-                            <div className="text-xs font-space text-emerald-400 flex items-center gap-2">
-                                {selectedImageIds.size > 0 ? (
-                                    <>
-                                        <CheckCircle2 className="w-4 h-4" />
-                                        <span>
-                                            {selectedImageIds.size} image
-                                            {selectedImageIds.size !== 1
-                                                ? "s"
-                                                : ""}{" "}
-                                            selected
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span className="text-slate-500">
-                                        Select images above to ask questions
-                                    </span>
+                    <div className="mb-3 px-1">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className={cn(
+                                    "bg-red-500 flex items-center gap-2 px-3 py-1.5 rounded-lg backdrop-blur-md border transition-all duration-300 flex-shrink-0",
+                                    selectedImageIds.size > 0
+                                        ? "bg-slate-900/80 border-emerald-500/30"
+                                        : "bg-transparent border-transparent"
                                 )}
-                            </div>
-                        </div>
-
-                        {selectedImageIds.size > 0 && (
-                            <button
-                                onClick={() => {
-                                    setSelectedImageIds(new Set());
-                                    setActiveBatchId(null);
-                                }}
-                                className="text-xs text-slate-400 hover:text-white transition-colors bg-slate-900/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 hover:bg-red-900/20 hover:border-red-500/30"
                             >
-                                Clear selection
-                            </button>
-                        )}
+                                <div className="text-xs font-space text-emerald-400 flex items-center gap-2">
+                                    {selectedImageIds.size > 0 ? (
+                                        <>
+                                            <CheckCircle2 className="w-4 h-4" />
+                                            <span>
+                                                {selectedImageIds.size} image
+                                                {selectedImageIds.size !== 1
+                                                    ? "s"
+                                                    : ""}{" "}
+                                                selected
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-slate-500">
+                                            Select images above to ask questions
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Input default options */}
+                            <div className="flex items-center overflow-x-scroll gap-2 flex-1 min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                {defaultOptions.map((option, index) => (
+                                    <div
+                                        key={index}
+                                        className={`flex text-nowrap items-center justify-center text-xs text-slate-400 cursor-pointer transition-colors ${
+                                            option === inputValue
+                                                ? "bg-emerald-900/20 border-emerald-500/30 text-white hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-slate-400"
+                                                : "bg-slate-900/60 hover:bg-emerald-900/20 hover:border-emerald-500/30 hover:text-white"
+                                        } backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 `}
+                                        onClick={() => {
+                                            if (inputValue === "") {
+                                                setInputValue(option);
+                                                inputRef.current?.focus();
+                                            } else if (inputValue === option) {
+                                                setInputValue("");
+                                            } else {
+                                                setInputValue(option);
+                                                inputRef.current?.focus();
+                                            }
+                                        }}
+                                    >
+                                        {option}
+                                    </div>
+                                ))}
+                            </div>
+                            {selectedImageIds.size > 0 && (
+                                <button
+                                    onClick={() => {
+                                        setSelectedImageIds(new Set());
+                                        setActiveBatchId(null);
+                                    }}
+                                    className="text-xs text-slate-400 hover:text-white transition-colors bg-red-500/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 hover:bg-red-900/20 hover:border-red-500/30 flex-shrink-0"
+                                >
+                                    Clear selection
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl opacity-30 group-hover:opacity-60 blur transition duration-200"></div>
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl opacity-50 group-hover:opacity-70 blur transition duration-200"></div>
                         <div
                             className="relative bg-slate-800 rounded-2xl flex items-center p-2 shadow-2xl border border-white/10"
                             onClick={() => {
