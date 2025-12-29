@@ -13,7 +13,7 @@ export const analyzeImage = async (
 ): Promise<AnalysisResult> => {
     try {
         // Add 5 second delay before making the API call
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // await new Promise((resolve) => setTimeout(resolve, 5000));
 
         const apiRes = await fetch(
             "https://api.openai.com/v1/chat/completions",
